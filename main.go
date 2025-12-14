@@ -22,6 +22,9 @@ func main() {
     r.Get("/api/slots/{id}", slotHandler.GetSlot)
     r.Put("/api/slots/{id}", slotHandler.UpdateSlot)
     r.Delete("/api/slots/{id}", slotHandler.DeleteSlot)
+    
+    
+    log.Println("Server started on http://localhost:8080")
 
     http.ListenAndServe(":8080", r)
 }

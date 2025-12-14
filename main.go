@@ -33,7 +33,7 @@ func main() {
 	r.Get("/api/command", commandHandler.GetCommand)
 	r.Post("/api/command", commandHandler.SetCommand)
 
-	eventHandler := &handlers.EventHandler{Store: db}
+	eventHandler := &handlers.EventHandler{Store: store}
 	r.Post("/api/events", eventHandler.CreateEvent)
 	r.Get("/api/events", eventHandler.ListEvents)
 

@@ -8,8 +8,3 @@ type ParkingSlot struct {
     LastUpdate int64  `json:"lastUpdate"`
 }
 
-// Command is what the cloud sends to the device (gate control, etc.).
-type Command struct {
-    Action    string `json:"action"`
-    Threshold int    `json:"threshold"`
-}

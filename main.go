@@ -1,42 +1,37 @@
 package main
 
 import (
-	"log"
-	"net/http"
+    "net/http"
+    "goparking/store"
+    "goparking/handlers"
 
-	"goparking/handlers"
-	"goparking/store"
-
-	"github.com/go-chi/chi/v5"
+    "github.com/go-chi/chi/v5"
+    "github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
-	// Initialize router and database
-	r := chi.NewRouter()
-	db := store.NewStore("parking.db")
+    r := chi.NewRouter()
+    r.Use(middleware.Logger)
 
-	// Handlers
-	slotHandler := &handlers.SlotHandler{Store: db}
-	commandHandler := &handlers.CommandHandler{Store: db}
+    dbPath := "parking.db"
+    store := store.NewStore(dbPath)
 
-	// Device endpoint
-	r.Post("/api/device/update", slotHandler.DeviceUpdate)
+    // Slot and Command handlers
+    slotHandler := &handlers.SlotHandler{Store: store}
+    commandHandler := &handlers.CommandHandler{Store: store}
 
-	// Slot CRUD endpoints
-	r.Post("/api/slots", slotHandler.CreateSlot)
-	r.Get("/api/slots", slotHandler.ListSlots)
-	r.Get("/api/slots/{id}", slotHandler.GetSlot)
-	r.Put("/api/slots/{id}", slotHandler.UpdateSlot)
-	r.Delete("/api/slots/{id}", slotHandler.DeleteSlot)
+    //  NEW: Event handler
+    eventHandler := &handlers.EventHandler{Store: store}
 
-	// Command endpoints
-	r.Get("/api/command", commandHandler.GetCommand)
-	r.Post("/api/command", commandHandler.SetCommand)
+    // Routes
+    r.Post("/api/device/update", slotHandler.CreateSlot)
+    r.Get("/api/slots", slotHandler.ListSlots)
+    r.Post("/api/command", commandHandler.SetCommand)
+    r.Get("/api/command", commandHandler.GetCommand)
 
-	eventHandler := &handlers.EventHandler{Store: store}
-	r.Post("/api/events", eventHandler.CreateEvent)
-	r.Get("/api/events", eventHandler.ListEvents)
+    //  NEW: Event routes
+    r.Post("/api/events", eventHandler.CreateEvent)
+    r.Get("/api/events", eventHandler.ListEvents)
 
-	log.Println("Server started on http://localhost:8080")
-	http.ListenAndServe(":8080", r)
+    http.ListenAndServe(":8080", r)
 }

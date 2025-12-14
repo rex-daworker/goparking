@@ -33,6 +33,10 @@ func main() {
 	r.Get("/api/command", commandHandler.GetCommand)
 	r.Post("/api/command", commandHandler.SetCommand)
 
+	eventHandler := &handlers.EventHandler{Store: db}
+	r.Post("/api/events", eventHandler.CreateEvent)
+	r.Get("/api/events", eventHandler.ListEvents)
+
 	log.Println("Server started on http://localhost:8080")
 	http.ListenAndServe(":8080", r)
 }

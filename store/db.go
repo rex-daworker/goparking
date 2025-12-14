@@ -19,16 +19,14 @@ func NewStore(path string) *Store {
 	}
 
 	schema := `
-    CREATE TABLE IF NOT EXISTS slots (
-        id TEXT PRIMARY KEY,
-        distance INTEGER NOT NULL,
-        status TEXT NOT NULL,
-        last_update INTEGER NOT NULL,
-        device_id TEXT,
-        device_name TEXT,
-        sensor_status TEXT
-    );
-    `
+CREATE TABLE IF NOT EXISTS events (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL,
+    message TEXT NOT NULL,
+    timestamp INTEGER NOT NULL
+);
+`
+
 	if _, err := db.Exec(schema); err != nil {
 		log.Fatal("create schema:", err)
 	}
@@ -102,4 +100,30 @@ func (s *Store) SetCommand(cmd models.Command) error {
             threshold=excluded.threshold
     `, cmd.Action, cmd.Threshold)
 	return err
+}
+
+func (s *Store) AddEvent(event models.Event) error {
+    _, err := s.DB.Exec(`
+        INSERT INTO events (id, type, message, timestamp)
+        VALUES (?, ?, ?, ?)
+    `, event.ID, event.Type, event.Message, event.Timestamp)
+    return err
+}
+
+func (s *Store) ListEvents() ([]models.Event, error) {
+    rows, err := s.DB.Query(`SELECT id, type, message, timestamp FROM events`)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var events []models.Event
+    for rows.Next() {
+        var e models.Event
+        if err := rows.Scan(&e.ID, &e.Type, &e.Message, &e.Timestamp); err != nil {
+            return nil, err
+        }
+        events = append(events, e)
+    }
+    return events, nil
 }

@@ -82,3 +82,24 @@ func (s *Store) DeleteSlot(id string) error {
 	_, err := s.DB.Exec(`DELETE FROM slots WHERE id=?`, id)
 	return err
 }
+
+// In store/db.go
+func (s *Store) GetCommand() (*models.Command, error) {
+	row := s.DB.QueryRow(`SELECT action, threshold FROM commands WHERE key='main'`)
+	var cmd models.Command
+	if err := row.Scan(&cmd.Action, &cmd.Threshold); err != nil {
+		return nil, err
+	}
+	return &cmd, nil
+}
+
+func (s *Store) SetCommand(cmd models.Command) error {
+	_, err := s.DB.Exec(`
+        INSERT INTO commands (key, action, threshold)
+        VALUES ('main', ?, ?)
+        ON CONFLICT(key) DO UPDATE SET
+            action=excluded.action,
+            threshold=excluded.threshold
+    `, cmd.Action, cmd.Threshold)
+	return err
+}

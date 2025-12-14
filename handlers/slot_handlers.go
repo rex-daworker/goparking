@@ -37,7 +37,7 @@ func (h *SlotHandler) CreateSlot(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := validators.ValidateSlotInput(dto.ID, dto.Distance, dto.Status); err != nil {
+	if err := validators.ValidateSlotInput(dto.ID, dto.Distance, dto.Status, dto.DeviceID, dto.SensorStatus); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -145,7 +145,7 @@ func (h *SlotHandler) DeviceUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := validators.ValidateSlotInput(dto.ID, dto.Distance, dto.Status); err != nil {
+	if err := validators.ValidateSlotInput(dto.ID, dto.Distance, dto.Status, dto.DeviceID, dto.SensorStatus); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

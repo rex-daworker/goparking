@@ -6,16 +6,19 @@ import (
 )
 
 // ValidateSlotInput checks distance and status before DB writes.
-func ValidateSlotInput(id string, distance int, status string) error {
-	if strings.TrimSpace(id) == "" {
-		return errors.New("id is required")
-	}
-	if distance < 0 || distance > 500 {
-		return errors.New("distance must be between 0 and 500 cm")
-	}
-	status = strings.ToLower(status)
-	if status != "free" && status != "occupied" && status != "unknown" {
-		return errors.New(`status must be "free", "occupied" or "unknown"`)
-	}
-	return nil
+func ValidateSlotInput(id string, distance int, status string, deviceID string, sensorStatus string) error {
+    if id == "" {
+        return errors.New("slot ID required")
+    }
+    if deviceID == "" {
+        return errors.New("device ID required")
+    }
+    if sensorStatus != "active" && sensorStatus != "inactive" {
+        return errors.New("sensor status must be active or inactive")
+    }
+    if distance < 0 {
+        return errors.New("distance must be non-negative")
+    }
+    return nil
 }
+

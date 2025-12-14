@@ -24,11 +24,15 @@ func NewStore(path string) *Store {
 
 	schema := `
 CREATE TABLE IF NOT EXISTS slots (
-  id TEXT PRIMARY KEY,
-  distance INTEGER NOT NULL,
-  status TEXT NOT NULL,
-  last_update INTEGER NOT NULL
+    id TEXT PRIMARY KEY,
+    distance INTEGER NOT NULL,
+    status TEXT NOT NULL,
+    last_update INTEGER NOT NULL,
+    device_id TEXT,
+    device_name TEXT,
+    sensor_status TEXT
 );
+
 
 CREATE TABLE IF NOT EXISTS history (
   time INTEGER PRIMARY KEY,

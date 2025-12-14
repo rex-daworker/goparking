@@ -35,4 +35,5 @@ func (h *EventHandler) ListEvents(w http.ResponseWriter, r *http.Request) {
         return
     }
     json.NewEncoder(w).Encode(events)
+    
 }

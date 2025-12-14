@@ -22,7 +22,6 @@ type SlotCreateUpdateDTO struct {
 	Distance     int    `json:"distance"`
 	Status       string `json:"status"`
 	DeviceID     string `json:"device_id"`
-	DeviceName   string `json:"device_name"`
 	SensorStatus string `json:"sensor_status"`
 }
 

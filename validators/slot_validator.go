@@ -22,3 +22,4 @@ func ValidateSlotInput(id string, distance int, status string, deviceID string, 
     return nil
 }
 
+

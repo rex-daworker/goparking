@@ -18,14 +18,13 @@ type SlotHandler struct {
 
 // ---------- DTO ----------
 type SlotCreateUpdateDTO struct {
-    ID          string `json:"id"`
-    Distance    int    `json:"distance"`
-    Status      string `json:"status"`
-    DeviceID    string `json:"device_id"`
-    DeviceName  string `json:"device_name"`
-    SensorStatus string `json:"sensor_status"`
+	ID           string `json:"id"`
+	Distance     int    `json:"distance"`
+	Status       string `json:"status"`
+	DeviceID     string `json:"device_id"`
+	DeviceName   string `json:"device_name"`
+	SensorStatus string `json:"sensor_status"`
 }
-
 
 // ============================================================
 // 🔹 ADMIN / TESTING CRUD ENDPOINTS
@@ -97,7 +96,7 @@ func (h *SlotHandler) UpdateSlot(w http.ResponseWriter, r *http.Request) {
 		dto.ID = id
 	}
 
-	if err := validators.ValidateSlotInput(dto.ID, dto.Distance, dto.Status); err != nil {
+	if err := validators.ValidateSlotInput(dto.ID, dto.Distance, dto.Status, dto.DeviceID, dto.SensorStatus); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

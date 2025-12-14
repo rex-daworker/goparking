@@ -1,37 +1,59 @@
 package main
 
 import (
-    "net/http"
-    "goparking/store"
-    "goparking/handlers"
+	"log"
+	"net/http"
+	"time"
 
-    "github.com/go-chi/chi/v5"
-    "github.com/go-chi/chi/v5/middleware"
+	"goparking/handlers"
+	"goparking/store"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
-    r := chi.NewRouter()
-    r.Use(middleware.Logger)
+	// 1. Init SQLite store
+	st := store.NewStore("parking.db")
 
-    dbPath := "parking.db"
-    store := store.NewStore(dbPath)
+	// 2. Handlers
+	slotHandler := &handlers.SlotHandler{Store: st}
+	cmdHandler := &handlers.CommandHandler{Store: st}
+	eventHandler := &handlers.EventHandler{Store: st}
 
-    // Slot and Command handlers
-    slotHandler := &handlers.SlotHandler{Store: store}
-    commandHandler := &handlers.CommandHandler{Store: store}
+	// 3. Router
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.Timeout(60 * time.Second))
 
-    //  NEW: Event handler
-    eventHandler := &handlers.EventHandler{Store: store}
+	// Health
+	r.Get("/health", handlers.Health)
 
-    // Routes
-    r.Post("/api/device/update", slotHandler.CreateSlot)
-    r.Get("/api/slots", slotHandler.ListSlots)
-    r.Post("/api/command", commandHandler.SetCommand)
-    r.Get("/api/command", commandHandler.GetCommand)
+	// API
+	r.Route("/api", func(r chi.Router) {
+		// Slots CRUD (admin/testing)
+		r.Get("/slots", slotHandler.ListSlots)
+		r.Post("/slots", slotHandler.CreateSlot)
+		r.Get("/slots/{id}", slotHandler.GetSlot)
+		r.Put("/slots/{id}", slotHandler.UpdateSlot)
+		r.Delete("/slots/{id}", slotHandler.DeleteSlot)
 
-    //  NEW: Event routes
-    r.Post("/api/events", eventHandler.CreateEvent)
-    r.Get("/api/events", eventHandler.ListEvents)
+		// Device → backend
+		r.Post("/device/update", slotHandler.CreateSlot) // or your DeviceUpdate if you prefer
 
-    http.ListenAndServe(":8080", r)
+		// Command control (cloud ↔ device)
+		r.Get("/command", cmdHandler.GetCommand)  // Arduino polls this
+		r.Post("/command", cmdHandler.SetCommand) // control panel / manual
+
+		// NEW: Events
+		r.Post("/events", eventHandler.CreateEvent)
+		r.Get("/events", eventHandler.ListEvents)
+	})
+
+	addr := ":8080"
+	log.Printf("Go backend running on http://localhost%v\n", addr)
+	if err := http.ListenAndServe(addr, r); err != nil {
+		log.Fatal(err)
+	}
 }
